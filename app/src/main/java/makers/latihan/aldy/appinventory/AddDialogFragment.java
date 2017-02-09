@@ -1,11 +1,13 @@
 package makers.latihan.aldy.appinventory;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -69,7 +71,7 @@ public class AddDialogFragment extends DialogFragment {
                         } else {
                             int quantity = Integer.parseInt(qty);
                             Float priceProd = Float.parseFloat(price);
-                            insertProduct(name, quantity, priceProd);
+                            insertProduct(name, quantity, priceProd, mImageURI);
                             wantToCloseDialog = true;
                         }
 
@@ -84,13 +86,23 @@ public class AddDialogFragment extends DialogFragment {
         return super.onCreateDialog(savedInstanceState);
     }
 
-    private void insertProduct(String name, int quantity, Float priceProd) {
+    private void insertProduct(String name, int quantity, Float priceProd, String imagePath) {
         ContentValues values = new ContentValues();
         values.put(ProductContract.ProductEntry.COLUMN_PRODUCTS_NAME, name);
         values.put(ProductContract.ProductEntry.COLUMN_QUANTITY, quantity);
         values.put(ProductContract.ProductEntry.COLUMN_PRICE, priceProd);
         if (!"".equals(imagePath))
-            values.put(ProductEntry.COLUMN_PRODUCT_IMAGE, imagePath);
-        getActivity().getContentResolver().insert(ProductEntry.CONTENT_URI, values);
+            values.put(ProductContract.ProductEntry.COLUMN_IMAGE, imagePath);
+        getActivity().getContentResolver().insert(ProductContract.ProductEntry.CONTENT_URI, values);
+    }
+
+    // get result data from selecting an image
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+            Uri selectedImage = data.getData();
+            mImageURI = selectedImage.toString();
+        }
     }
 }
